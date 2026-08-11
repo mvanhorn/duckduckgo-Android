@@ -41,6 +41,7 @@ import com.duckduckgo.app.trackerdetection.model.Entity
 import com.duckduckgo.browser.api.UserBrowserProperties
 import com.duckduckgo.browsermode.api.BrowserMode
 import com.duckduckgo.common.test.CoroutineTestRule
+import com.duckduckgo.common.ui.store.AppBrandDesignUpdateToggles
 import com.duckduckgo.common.utils.baseHost
 import com.duckduckgo.duckchat.api.DuckAiFeatureState
 import com.duckduckgo.duckchat.api.DuckChat
@@ -132,6 +133,7 @@ class OmnibarLayoutViewModelTest {
         on { softwareRenderingModeEnabled } doReturn softwareRenderingModeEnabledFlow
     }
     private val fakeProgressBarUpgradeFeature = FakeFeatureToggleFactory.create(ProgressBarUpgradeFeature::class.java)
+    private val fakeAppBrandDesignUpdateToggles = FakeFeatureToggleFactory.create(AppBrandDesignUpdateToggles::class.java)
     private val browserMode: BrowserMode = BrowserMode.REGULAR
 
     private lateinit var fakeStandardizedLeadingIconToggle: StandardizedLeadingIconFeatureToggle
@@ -157,6 +159,7 @@ class OmnibarLayoutViewModelTest {
         whenever(duckChat.observeNativeInputFieldUserSettingEnabled()).thenReturn(nativeInputFieldSettingFlow)
         whenever(duckChat.observeNativeChatInputEnabled()).thenReturn(nativeChatInputEnabledFlow)
         fakeNativeInputSearchOnlyFeature.self().setRawStoredState(State(enable = false))
+        fakeAppBrandDesignUpdateToggles.addressBar().setRawStoredState(State(enable = false))
         whenever(duckChatInputModeState.inputModeCapability).thenReturn(inputModeCapabilityFlow)
         whenever(duckChat.activeVoiceChatSessions).thenReturn(activeVoiceSessionsFlow)
         whenever(duckChat.observeInputScreenUserSettingEnabled()).thenReturn(inputScreenUserSettingFlow)
@@ -219,7 +222,28 @@ class OmnibarLayoutViewModelTest {
             progressBarUpgradeFeature = fakeProgressBarUpgradeFeature,
             nativeInputSearchOnlyFeature = fakeNativeInputSearchOnlyFeature,
             browserMode = browserMode,
+            appBrandDesignUpdateToggles = fakeAppBrandDesignUpdateToggles,
         )
+    }
+
+    @Test
+    fun whenAddressBarRebrandToggleChangesThenViewStateIsUpdated() = runTest {
+        testee.viewState.test {
+            assertFalse(awaitItem().isAddressBarRebrandEnabled)
+
+            fakeAppBrandDesignUpdateToggles.addressBar().setRawStoredState(State(enable = true))
+
+            assertTrue(awaitItem().isAddressBarRebrandEnabled)
+        }
+    }
+
+    @Test
+    fun whenAddressBarRebrandEnabledBeforeViewModelCreatedThenInitialViewStateIsEnabled() = runTest {
+        fakeAppBrandDesignUpdateToggles.addressBar().setRawStoredState(State(enable = true))
+
+        initializeViewModel()
+
+        assertTrue(testee.viewState.value.isAddressBarRebrandEnabled)
     }
 
     @Test
