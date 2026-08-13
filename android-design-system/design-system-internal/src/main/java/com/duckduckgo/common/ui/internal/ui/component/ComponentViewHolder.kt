@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -53,10 +52,6 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.RecyclerView
 import coil3.compose.rememberAsyncImagePainter
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.duckduckgo.common.ui.compose.DaxAction
 import com.duckduckgo.common.ui.compose.appbars.DaxSearchTopAppBar
 import com.duckduckgo.common.ui.compose.appbars.DaxTopAppBar
@@ -437,19 +432,7 @@ sealed class ComponentViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 
             view.setupThemedComposeView(R.id.big_single_lottie_remote_message_compose, isDarkTheme = isDarkTheme) {
                 DaxBigSingleActionMessage(
-                    topIllustration = {
-                        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.anim_password_keys))
-                        val progress by animateLottieCompositionAsState(
-                            composition = composition,
-                        )
-                        LottieAnimation(
-                            composition = composition,
-                            progress = { progress },
-                            modifier = Modifier
-                                .padding(top = 8.dp)
-                                .heightIn(max = 96.dp),
-                        )
-                    },
+                    topIllustration = painterResource(R.drawable.passwords_keychain_128),
                     title = "Bring your passwords from Google to DuckDuckGo",
                     body = "Quickly and securely import your passwords to DuckDuckGo. Google may ask you to enter your password.",
                     action = DaxAction(text = "Import From Google", onClick = {}),
