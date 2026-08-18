@@ -16,6 +16,7 @@
 
 package com.duckduckgo.app.onboarding
 
+import com.duckduckgo.app.onboarding.store.OnboardingStore
 import com.duckduckgo.app.onboardingbranddesignupdate.OnboardingBrandDesignUpdateToggles
 import com.duckduckgo.common.test.CoroutineTestRule
 import com.duckduckgo.common.test.api.InMemorySharedPreferences
@@ -50,6 +51,7 @@ class CustomAiOnboardingStoreImplTest {
     private val disabledToggle: Toggle = mock { on { isEnabled() } doReturn false }
     private val customAiOnboardingFeature: CustomAiOnboardingFeature = mock()
     private val brandDesignUpdateToggles: OnboardingBrandDesignUpdateToggles = mock()
+    private val onboardingStore: OnboardingStore = mock()
 
     private val resolvedListener = object : AppInstallationReferrerStateListener {
         override fun initialiseReferralRetrieval() {}
@@ -67,6 +69,7 @@ class CustomAiOnboardingStoreImplTest {
             dispatcherProvider = coroutineRule.testDispatcherProvider,
             customAiOnboardingFeature = customAiOnboardingFeature,
             brandDesignUpdateToggles = brandDesignUpdateToggles,
+            onboardingStore = onboardingStore,
         )
 
     @Before
@@ -179,19 +182,5 @@ class CustomAiOnboardingStoreImplTest {
         }
         // a fresh instance backed by the same storage reads the persisted decision
         assertTrue(store().isEnabled())
-    }
-
-    @Test
-    fun `when not armed then consume open input returns false`() {
-        assertFalse(store().consumeOpenInputOnDuckAiTab())
-    }
-
-    @Test
-    fun `when armed then consume open input returns true once and self clears`() {
-        val store = store()
-        store.setOpenInputOnDuckAiTab()
-
-        assertTrue(store.consumeOpenInputOnDuckAiTab())
-        assertFalse(store.consumeOpenInputOnDuckAiTab())
     }
 }

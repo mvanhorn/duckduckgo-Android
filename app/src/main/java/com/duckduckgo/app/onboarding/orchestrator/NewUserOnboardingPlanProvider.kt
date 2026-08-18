@@ -28,6 +28,7 @@ import com.duckduckgo.app.onboarding.CustomAiOnboardingResolver
 import com.duckduckgo.app.onboarding.CustomAiOnboardingStore
 import com.duckduckgo.app.onboarding.DuckAiOnboardingAvailability
 import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo
+import com.duckduckgo.app.onboarding.OnboardingInputScreenLaunchTarget
 import com.duckduckgo.app.onboarding.OnboardingPreference
 import com.duckduckgo.app.onboarding.OnboardingPreferenceApplier
 import com.duckduckgo.app.onboarding.OnboardingPromptsExperimentManager
@@ -100,6 +101,7 @@ class NewUserOnboardingPlanProvider @Inject constructor(
     private val dispatchers: DispatcherProvider,
     private val dismissedCtaDao: DismissedCtaDao,
     private val customAiOnboardingStore: CustomAiOnboardingStore,
+    private val onboardingInputScreenLaunchTarget: OnboardingInputScreenLaunchTarget,
     private val customAiOnboardingResolver: CustomAiOnboardingResolver,
     private val duckAiOnboardingDemo: DuckAiOnboardingDemo,
     private val onboardingPromptsExperimentManager: OnboardingPromptsExperimentManager,
@@ -205,8 +207,8 @@ class NewUserOnboardingPlanProvider @Inject constructor(
             }
         }
         val markInputToLaunchOnChat = {
-            // The custom-AI flow always finishes on the Duck.ai (chat) tab
-            customAiOnboardingStore.setOpenInputOnDuckAiTab()
+            // A Duck.ai demo always finishes on the Duck.ai (chat) tab
+            onboardingInputScreenLaunchTarget.setOpenOnDuckAi()
         }
         val onCompleted = suspend {
             dismissDuckAiFireCta()
@@ -253,8 +255,8 @@ class NewUserOnboardingPlanProvider @Inject constructor(
             }
         }
         val markInputToLaunchOnChat = {
-            // The custom-AI flow always finishes on the Duck.ai (chat) tab
-            customAiOnboardingStore.setOpenInputOnDuckAiTab()
+            // A Duck.ai demo always finishes on the Duck.ai (chat) tab
+            onboardingInputScreenLaunchTarget.setOpenOnDuckAi()
         }
         val onCompleted = suspend {
             if (ctx.downloadReasonSelection == DownloadReasonSelection.AI_CHAT) {
@@ -842,7 +844,10 @@ class NewUserOnboardingPlanProvider @Inject constructor(
 
     // Chat-only preview: the toggle is hidden and the demo defaults to chat. Captures the prompt for the
     // duck_ai_demo step.
-    private fun customAiInputScreenPreviewStep(ctx: NewUserOnboardingPlanContext, duckAiEnabled: SuspendMemo<Boolean>): NewUserOnboardingActivityStep {
+    private fun customAiInputScreenPreviewStep(
+        ctx: NewUserOnboardingPlanContext,
+        duckAiEnabled: SuspendMemo<Boolean>,
+    ): NewUserOnboardingActivityStep {
         val pixelName = OnboardingPixelName.ONBOARDING_SEARCH_CHAT_TOGGLE
         return NewUserOnboardingActivityStep(
             id = NewUserOnboardingStepIds.INPUT_SCREEN_PREVIEW,

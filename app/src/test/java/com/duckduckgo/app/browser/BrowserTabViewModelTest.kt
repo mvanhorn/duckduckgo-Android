@@ -209,6 +209,7 @@ import com.duckduckgo.app.global.model.Site
 import com.duckduckgo.app.global.model.SiteFactoryImpl
 import com.duckduckgo.app.location.data.LocationPermissionsDao
 import com.duckduckgo.app.onboarding.CustomAiOnboardingStore
+import com.duckduckgo.app.onboarding.OnboardingInputScreenLaunchTarget
 import com.duckduckgo.app.onboarding.store.AppStage
 import com.duckduckgo.app.onboarding.store.AppStage.ESTABLISHED
 import com.duckduckgo.app.onboarding.store.OnboardingStore
@@ -479,6 +480,7 @@ class BrowserTabViewModelTest {
 
     private val mockOnboardingStore: OnboardingStore = mock()
     private val mockCustomAiOnboardingStore: CustomAiOnboardingStore = mock()
+    private val mockOnboardingInputScreenLaunchTarget: OnboardingInputScreenLaunchTarget = mock()
 
     private val mockAutoCompleteService: AutoCompleteService = mock()
 
@@ -1053,6 +1055,7 @@ class BrowserTabViewModelTest {
                 onboardingStore = mockOnboardingStore,
                 autocompleteHistoryDeleteFeature = fakeAutocompleteHistoryDeleteFeature,
                 customAiOnboardingStore = mockCustomAiOnboardingStore,
+                onboardingInputScreenLaunchTarget = mockOnboardingInputScreenLaunchTarget,
                 browserMode = browserMode,
                 desktopModeSettings = mockDesktopModeSettings,
                 rememberDesktopModeFeature = fakeRememberDesktopModeFeature,
@@ -3978,7 +3981,7 @@ class BrowserTabViewModelTest {
 
         assertNull(testee.ctaViewState.value?.cta)
         assertCommandIssued<HideOnboardingDaxBubbleCta>()
-        verify(mockCustomAiOnboardingStore).setOpenInputOnDuckAiTab()
+        verify(mockOnboardingInputScreenLaunchTarget).setOpenOnDuckAi()
         assertCommandIssued<ShowKeyboard>()
     }
 
@@ -3991,7 +3994,7 @@ class BrowserTabViewModelTest {
         advanceUntilIdle()
 
         assertNotEquals(cta, testee.ctaViewState.value?.cta)
-        verify(mockCustomAiOnboardingStore, never()).setOpenInputOnDuckAiTab()
+        verify(mockOnboardingInputScreenLaunchTarget, never()).setOpenOnDuckAi()
     }
 
     @Test
@@ -4003,7 +4006,7 @@ class BrowserTabViewModelTest {
         advanceUntilIdle()
 
         assertNotEquals(cta, testee.ctaViewState.value?.cta)
-        verify(mockCustomAiOnboardingStore, never()).setOpenInputOnDuckAiTab()
+        verify(mockOnboardingInputScreenLaunchTarget, never()).setOpenOnDuckAi()
     }
 
     private fun daxEndBrandDesignUpdateBubbleCta(isSegmentedSearchPathWithToggleEnabled: Boolean) = DaxEndBrandDesignUpdateBubbleCta(
