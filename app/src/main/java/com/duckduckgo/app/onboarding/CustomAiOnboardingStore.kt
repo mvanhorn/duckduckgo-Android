@@ -17,7 +17,6 @@
 package com.duckduckgo.app.onboarding
 
 import androidx.core.content.edit
-import com.duckduckgo.app.onboarding.store.OnboardingStore
 import com.duckduckgo.app.onboardingbranddesignupdate.OnboardingBrandDesignUpdateToggles
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.data.store.api.SharedPreferencesProvider
@@ -40,12 +39,13 @@ import javax.inject.Inject
 
 interface CustomAiOnboardingStore {
     /**
-     * Returns whether the custom AI onboarding plan is engaged.
+     * Returns whether this install came from the `onboarding=ai` campaign referral.
      *
-     * The decision persisted by [CustomAiOnboardingResolver.resolve] at an onboarding plan build time.
-     * Calling [isEnabled] does not re-evaluate.
+     * The decision is persisted by [CustomAiOnboardingResolver.resolve] at onboarding plan build time.
+     * Calling this does not re-evaluate. It says nothing about whether a Duck.ai demo ran — ask
+     * [com.duckduckgo.app.onboarding.DuckAiOnboardingDemo] for that.
      */
-    suspend fun isEnabled(): Boolean
+    suspend fun isAiReferralOnboarding(): Boolean
 }
 
 interface CustomAiOnboardingResolver {
@@ -54,7 +54,7 @@ interface CustomAiOnboardingResolver {
      *
      * Awaits Play Install Referrer resolution (bounded by a built-in timeout), then ANDs the referral
      * signal (`onboarding=ai`) with the feature preconditions. Timeout / non-Play-build / referrer
-     * failure / preconditions not met -> `false`. The result is persisted so later [CustomAiOnboardingStore.isEnabled]
+     * failure / preconditions not met -> `false`. The result is persisted so later [CustomAiOnboardingStore.isAiReferralOnboarding]
      * reads return this same value without re-evaluating.
      *
      * Should be called once at an onboarding plan build time to pick the onboarding run. Re-invoking recomputes and overwrites.
@@ -72,7 +72,6 @@ class CustomAiOnboardingStoreImpl @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val customAiOnboardingFeature: CustomAiOnboardingFeature,
     private val brandDesignUpdateToggles: OnboardingBrandDesignUpdateToggles,
-    private val onboardingStore: OnboardingStore,
 ) : CustomAiOnboardingStore, CustomAiOnboardingResolver, ReferrerParserPlugin {
 
     private val preferences by lazy { sharedPreferencesProvider.getSharedPreferences(PREFS_FILENAME) }
@@ -104,9 +103,9 @@ class CustomAiOnboardingStoreImpl @Inject constructor(
         }
     }
 
-    override suspend fun isEnabled(): Boolean = resolveMutex.withLock {
+    override suspend fun isAiReferralOnboarding(): Boolean = resolveMutex.withLock {
         withContext(dispatcherProvider.io()) {
-            onboardingStore.isSegmentedAiPathEnabled() || preferences.getBoolean(PREFS_KEY_ENABLED, false)
+            preferences.getBoolean(PREFS_KEY_ENABLED, false)
         }
     }
 

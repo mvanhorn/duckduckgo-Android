@@ -463,7 +463,6 @@ class NewUserOnboardingPlanProvider @Inject constructor(
                         }
 
                         ctx.downloadReasonSelection = selection
-                        onboardingStore.setSegmentedAiPathEnabled(selection == DownloadReasonSelection.AI_CHAT)
                         when (selection) {
                             DownloadReasonSelection.SEARCH -> SwitchTo(segmentedSearchPlan(ctx))
                             DownloadReasonSelection.AI_CHAT -> SwitchTo(segmentedAiPlan(ctx))

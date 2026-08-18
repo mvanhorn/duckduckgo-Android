@@ -58,7 +58,7 @@ class RealOnboardingPixelSenderTest {
     private val mockPixel: Pixel = mock()
     private val mockAppInstallStore: AppInstallStore = mock()
     private val mockCustomAiOnboardingStore: CustomAiOnboardingStore = mock {
-        onBlocking { isEnabled() } doReturn false
+        onBlocking { isAiReferralOnboarding() } doReturn false
     }
     private val fakePreferences = InMemorySharedPreferences()
     private val fakeSharedPreferencesProvider: SharedPreferencesProvider = mock {
@@ -452,7 +452,7 @@ class RealOnboardingPixelSenderTest {
     @Test
     fun whenCustomAiFlowThenFlowDuckai() = runTest {
         whenever(mockAppInstallStore.installTimestamp).thenReturn(System.currentTimeMillis())
-        whenever(mockCustomAiOnboardingStore.isEnabled()).thenReturn(true)
+        whenever(mockCustomAiOnboardingStore.isAiReferralOnboarding()).thenReturn(true)
 
         testee.fire(ONBOARDING_WELCOME, OnboardingPixelAction.Shown)
 
@@ -466,7 +466,7 @@ class RealOnboardingPixelSenderTest {
     @Test
     fun whenDuckAiOnboardingFlowThenVariantParamIsChat() = runTest {
         whenever(mockAppInstallStore.installTimestamp).thenReturn(System.currentTimeMillis())
-        whenever(mockCustomAiOnboardingStore.isEnabled()).thenReturn(true)
+        whenever(mockCustomAiOnboardingStore.isAiReferralOnboarding()).thenReturn(true)
         val prefs = InMemorySharedPreferences()
         val variantTestee = RealOnboardingPixelSender(
             appCoroutineScope = coroutineRule.testScope,

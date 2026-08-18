@@ -216,13 +216,13 @@ class RealOnboardingPixelSender @Inject constructor(
     }
 
     private suspend fun buildStandardParams(): Map<String, String> {
-        // source/flow are install-level facts: CustomAiOnboardingStore is the canonical source (a
+        // source/flow are install-level facts: the referral resolution is the canonical source (a
         // side-effect-free read of the decision persisted at plan build time).
         val reinstall = isReinstallUser.await()
         val (days, isCustomAiFlow, variant) = withContext(dispatchers.io()) {
             Triple(
                 appInstallStore.daysInstalled(),
-                customAiOnboardingStore.isEnabled(),
+                customAiOnboardingStore.isAiReferralOnboarding(),
                 when (variantPrefs.getString(PREFS_KEY_VARIANT, null)) {
                     PREFS_VARIANT_SEARCH -> VARIANT_SEARCH
                     PREFS_VARIANT_CHAT -> VARIANT_CHAT

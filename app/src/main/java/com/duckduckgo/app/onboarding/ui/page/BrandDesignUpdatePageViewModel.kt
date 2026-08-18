@@ -435,7 +435,7 @@ class BrandDesignUpdatePageViewModel @Inject constructor(
             }
             // Resolve the custom AI signal before collecting orchestrator state, so the flag is set
             // before any dialog is applied.
-            _viewState.update { it.copy(isCustomAiOnboardingFlow = customAiOnboardingStore.isEnabled()) }
+            _viewState.update { it.copy(isCustomAiOnboardingFlow = customAiOnboardingStore.isAiReferralOnboarding()) }
             _viewState.update { it.copy(onboardingImprovementsV2Enabled = isOnboardingImprovementsV2Enabled()) }
             observeOrchestratorState()
         }

@@ -124,7 +124,7 @@ class BrandDesignUpdatePageViewModelTest {
     fun setUp() {
         whenever(onboardingStore.getSearchOptions()).thenReturn(emptyList())
         whenever(onboardingStore.getChatSuggestions()).thenReturn(emptyList())
-        runBlocking { whenever(customAiOnboardingStore.isEnabled()).thenReturn(false) }
+        runBlocking { whenever(customAiOnboardingStore.isAiReferralOnboarding()).thenReturn(false) }
     }
 
     private fun createViewModel(orchestrator: LinearOnboardingOrchestrator = mockOrchestrator): BrandDesignUpdatePageViewModel =
@@ -740,7 +740,7 @@ class BrandDesignUpdatePageViewModelTest {
 
     @Test
     fun `when custom ai onboarding flow then view state enables custom ai flow`() = runTest {
-        whenever(customAiOnboardingStore.isEnabled()).thenReturn(true)
+        whenever(customAiOnboardingStore.isAiReferralOnboarding()).thenReturn(true)
         val testee = startAt(NewUserOnboardingActivityDialog.Initial)
         advanceUntilIdle()
 

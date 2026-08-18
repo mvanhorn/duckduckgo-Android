@@ -16,7 +16,6 @@
 
 package com.duckduckgo.app.onboarding
 
-import com.duckduckgo.app.onboarding.store.OnboardingStore
 import com.duckduckgo.app.onboardingbranddesignupdate.OnboardingBrandDesignUpdateToggles
 import com.duckduckgo.common.test.CoroutineTestRule
 import com.duckduckgo.common.test.api.InMemorySharedPreferences
@@ -51,7 +50,6 @@ class CustomAiOnboardingStoreImplTest {
     private val disabledToggle: Toggle = mock { on { isEnabled() } doReturn false }
     private val customAiOnboardingFeature: CustomAiOnboardingFeature = mock()
     private val brandDesignUpdateToggles: OnboardingBrandDesignUpdateToggles = mock()
-    private val onboardingStore: OnboardingStore = mock()
 
     private val resolvedListener = object : AppInstallationReferrerStateListener {
         override fun initialiseReferralRetrieval() {}
@@ -69,7 +67,6 @@ class CustomAiOnboardingStoreImplTest {
             dispatcherProvider = coroutineRule.testDispatcherProvider,
             customAiOnboardingFeature = customAiOnboardingFeature,
             brandDesignUpdateToggles = brandDesignUpdateToggles,
-            onboardingStore = onboardingStore,
         )
 
     @Before
@@ -131,47 +128,57 @@ class CustomAiOnboardingStoreImplTest {
     }
 
     @Test
-    fun `when resolve not called then isEnabled returns false`() = runTest {
-        // isEnabled is a pure read of the persisted decision; without resolve there is nothing to read
+    fun `when resolve not called then the referral predicate is false`() = runTest {
+        // isAiReferralOnboarding is a pure read of the persisted decision; without resolve there is nothing to read
         val store = store()
         store.process(mapOf("origin" to "funnel_playstore", "onboarding" to "ai"))
-        assertFalse(store.isEnabled())
+        assertFalse(store.isAiReferralOnboarding())
     }
 
     @Test
-    fun `when resolved true then isEnabled returns true`() = runTest {
+    fun `when resolved true then the referral predicate is true`() = runTest {
         val store = store()
         store.process(mapOf("origin" to "funnel_playstore", "onboarding" to "ai"))
         store.resolve()
-        assertTrue(store.isEnabled())
+        assertTrue(store.isAiReferralOnboarding())
     }
 
     @Test
-    fun `when resolved false then isEnabled returns false`() = runTest {
+    fun `when resolved false then the referral predicate is false`() = runTest {
         val store = store()
         store.resolve()
-        assertFalse(store.isEnabled())
+        assertFalse(store.isAiReferralOnboarding())
     }
 
     @Test
-    fun `when referral arrives after resolve then isEnabled stays frozen`() = runTest {
+    fun `when the referral resolved false on preconditions then the referral predicate stays false`() = runTest {
+        whenever(customAiOnboardingFeature.self()).thenReturn(disabledToggle)
+        val store = store()
+        store.process(mapOf("origin" to "funnel_playstore", "onboarding" to "ai"))
+        store.resolve()
+
+        assertFalse(store.isAiReferralOnboarding())
+    }
+
+    @Test
+    fun `when referral arrives after resolve then the referral predicate stays frozen`() = runTest {
         // Reviewer scenario: the run is chosen once by resolve(). A late-arriving referral signal must
-        // NOT flip isEnabled(), or end-of-journey CTAs would show custom-AI copy during the default plan.
+        // NOT flip isAiReferralOnboarding(), or end-of-journey CTAs would show custom-AI copy during the default plan.
         val store = store()
         assertFalse(store.resolve()) // referral not present at decision time -> default plan
         store.process(mapOf("origin" to "funnel_playstore", "onboarding" to "ai")) // arrives too late
-        assertFalse(store.isEnabled()) // frozen: still the default-plan decision
+        assertFalse(store.isAiReferralOnboarding()) // frozen: still the default-plan decision
     }
 
     @Test
-    fun `when precondition flips after resolve then isEnabled stays frozen`() = runTest {
+    fun `when precondition flips after resolve then the referral predicate stays frozen`() = runTest {
         val store = store()
         store.process(mapOf("origin" to "funnel_playstore", "onboarding" to "ai"))
         store.resolve()
-        assertTrue(store.isEnabled())
+        assertTrue(store.isAiReferralOnboarding())
 
         whenever(customAiOnboardingFeature.self()).thenReturn(disabledToggle) // flips after the decision
-        assertTrue(store.isEnabled()) // read does not re-evaluate preconditions
+        assertTrue(store.isAiReferralOnboarding()) // read does not re-evaluate preconditions
     }
 
     @Test
@@ -181,6 +188,6 @@ class CustomAiOnboardingStoreImplTest {
             it.resolve()
         }
         // a fresh instance backed by the same storage reads the persisted decision
-        assertTrue(store().isEnabled())
+        assertTrue(store().isAiReferralOnboarding())
     }
 }

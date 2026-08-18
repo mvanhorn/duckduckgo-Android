@@ -405,7 +405,7 @@ class ConfigDrivenOnboardingPageViewModel @Inject constructor(
             return
         }
 
-        val config = dialogConfigResolver.resolve(dialog, customAiOnboardingStore.isEnabled())
+        val config = dialogConfigResolver.resolve(dialog, customAiOnboardingStore.isAiReferralOnboarding())
         if (config != null) {
             shownPixels.fireFor(dialog)
             _viewState.update {

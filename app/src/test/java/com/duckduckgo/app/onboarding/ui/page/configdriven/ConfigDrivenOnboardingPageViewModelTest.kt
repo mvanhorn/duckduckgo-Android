@@ -108,7 +108,7 @@ class ConfigDrivenOnboardingPageViewModelTest {
 
     @Before
     fun setUp() {
-        runBlocking { whenever(customAiOnboardingStore.isEnabled()).thenReturn(false) }
+        runBlocking { whenever(customAiOnboardingStore.isAiReferralOnboarding()).thenReturn(false) }
     }
 
     private fun createViewModel(

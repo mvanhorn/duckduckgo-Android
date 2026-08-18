@@ -49,7 +49,7 @@ class CustomAiOnboardingPixels @Inject constructor(
 ) : MainProcessLifecycleObserver {
     init {
         appUserStageStore.userAppStageFlow().onEach {
-            if (it == AppStage.ESTABLISHED && customAiOnboardingStore.isEnabled()) {
+            if (it == AppStage.ESTABLISHED && customAiOnboardingStore.isAiReferralOnboarding()) {
                 pixel.fire(CustomAiOnboardingPixelName.PLAN_FINISHED, type = Pixel.PixelType.Unique())
             }
         }.launchIn(coroutineScope)
