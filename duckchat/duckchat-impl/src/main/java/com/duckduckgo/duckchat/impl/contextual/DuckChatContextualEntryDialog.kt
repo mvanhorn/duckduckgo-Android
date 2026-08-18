@@ -58,7 +58,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 import javax.inject.Named
-import com.duckduckgo.mobile.android.R as CommonR
 import com.google.android.material.R as MaterialR
 
 /**
@@ -251,7 +250,7 @@ class DuckChatContextualEntryDialog : DuckDuckGoBottomSheetDialogFragment() {
     private fun configureSuggestions() {
         // On the transparent dialog the chips sit over the dimmed page, so give them a solid surface
         // background (rather than the sheet's default) for legibility.
-        binding.entrySuggestionsView.chipBackgroundRes = CommonR.drawable.background_large_rounded_surface
+        binding.entrySuggestionsView.chipBackgroundRes = R.drawable.duck_ai_suggestion_prompt_background
         binding.entrySuggestionsView.onSuggestionSelected = { suggestion ->
             viewModel.onSuggestionSubmitted(NativeInputPrompt(suggestion.prompt, null, null, null, null, null))
         }
