@@ -222,14 +222,6 @@ class OnboardingStoreImpl @Inject constructor(
         preferences.edit { putBoolean(KEY_INPUT_SCREEN_SELECTION_OVERRIDDEN_BY_USER, true) }
     }
 
-    override fun setDuckAiOnboardingFlow() {
-        preferences.edit { putBoolean(KEY_DUCK_AI_ONBOARDING_FLOW, true) }
-    }
-
-    override fun isDuckAiOnboardingFlow(): Boolean {
-        return preferences.getBoolean(KEY_DUCK_AI_ONBOARDING_FLOW, false)
-    }
-
     override fun setSegmentedSearchPathWithToggleEnabled(enabled: Boolean) {
         preferences.edit { putBoolean(KEY_SEGMENTED_SEARCH_PATH_WITH_TOGGLE_ENABLED, enabled) }
     }
@@ -251,7 +243,6 @@ class OnboardingStoreImpl @Inject constructor(
         const val ONBOARDING_JOURNEY = "onboardingJourney"
         private const val KEY_INPUT_SCREEN_SELECTION = "inputScreenSelection"
         private const val KEY_INPUT_SCREEN_SELECTION_OVERRIDDEN_BY_USER = "inputScreenSelectionOverriddenByUser"
-        private const val KEY_DUCK_AI_ONBOARDING_FLOW = "duckAiOnboardingFlow"
         private const val KEY_LINEAR_PLAN_WIDGET_PROMPT_SHOWN = "linearPlanWidgetPromptShown"
         private const val KEY_SEGMENTED_SEARCH_PATH_WITH_TOGGLE_ENABLED = "segmentedSearchPathWithToggleEnabled"
         private const val KEY_SEGMENTED_AI_PATH_ENABLED = "segmentedAiPathEnabled"

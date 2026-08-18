@@ -286,6 +286,7 @@ import com.duckduckgo.app.global.model.domainMatchesUrl
 import com.duckduckgo.app.global.model.orderedTrackerBlockedEntities
 import com.duckduckgo.app.location.data.LocationPermissionType
 import com.duckduckgo.app.onboarding.CustomAiOnboardingStore
+import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo
 import com.duckduckgo.app.onboarding.OnboardingInputScreenLaunchTarget
 import com.duckduckgo.app.onboarding.store.OnboardingStore
 import com.duckduckgo.app.onboardingbranddesignupdate.OnboardingBrandDesignUpdateToggles
@@ -586,6 +587,7 @@ class BrowserTabViewModel @Inject constructor(
     private val onboardingStore: OnboardingStore,
     private val autocompleteHistoryDeleteFeature: AutocompleteHistoryDeleteFeature,
     private val customAiOnboardingStore: CustomAiOnboardingStore,
+    private val duckAiOnboardingDemo: DuckAiOnboardingDemo,
     private val onboardingInputScreenLaunchTarget: OnboardingInputScreenLaunchTarget,
     private val browserMode: BrowserMode,
     private val desktopModeSettings: DesktopModeSettings,
@@ -5806,10 +5808,9 @@ class BrowserTabViewModel @Inject constructor(
 
     fun dismissDuckAiFireOnboardingCta() {
         viewModelScope.launch {
-            // Custom AI onboarding defers dismissal to the end of the linear orchestrator
-            // run, so the CTA survives if the app is killed mid-onboarding and the flow
-            // has to re-run on next launch.
-            if (customAiOnboardingStore.isEnabled()) return@launch
+            // A plan-driven demo defers dismissal to the end of the linear orchestrator run, so the CTA
+            // survives if the app is killed mid-onboarding and the flow has to re-run on next launch.
+            if (duckAiOnboardingDemo.driver() == DuckAiOnboardingDemo.Driver.LinearPlan) return@launch
 
             val cta = ctaViewState.value?.cta ?: return@launch
             if (cta is OnboardingDaxDialogCta.DaxDuckAiFireButtonCta || cta is DaxDuckAiFireButtonBrandDesignUpdateContextualCta) {

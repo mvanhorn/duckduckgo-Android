@@ -23,6 +23,7 @@ import com.duckduckgo.app.cta.db.DismissedCtaDao
 import com.duckduckgo.app.cta.model.CtaId
 import com.duckduckgo.app.cta.model.DismissedCta
 import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo
+import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo.Driver
 import com.duckduckgo.app.onboarding.orchestrator.NewUserOnboardingEvent
 import com.duckduckgo.app.onboarding.store.AppStage
 import com.duckduckgo.app.onboarding.store.UserStageStore
@@ -95,9 +96,9 @@ class OnboardingViewModel @Inject constructor(
                 }
 
                 DUCK_AI_FOCUSED -> {
-                    // Arm the in-browser Duck.ai demo (sets the flow + silences the standard DAX CTAs).
-                    // Shared with the linear-onboarding duck_ai_demo step so both paths arm identically.
-                    duckAiOnboardingDemo.arm()
+                    // Browser-driven: this path has no orchestrator to end the episode, so the fire-button
+                    // CTA has to dismiss itself on interaction.
+                    duckAiOnboardingDemo.arm(Driver.Browser)
                 }
 
                 DEFAULT_WITHOUT_INTRO_CTA -> {

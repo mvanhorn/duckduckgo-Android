@@ -29,8 +29,6 @@ interface OnboardingStore {
     fun getInputScreenSelection(): Boolean?
     fun isInputScreenSelectionOverriddenByUser(): Boolean
     fun setInputScreenSelectionOverriddenByUser()
-    fun setDuckAiOnboardingFlow()
-    fun isDuckAiOnboardingFlow(): Boolean
     fun setSegmentedSearchPathWithToggleEnabled(enabled: Boolean)
     fun isSegmentedSearchPathWithToggleEnabled(): Boolean
     fun setSegmentedAiPathEnabled(enabled: Boolean)

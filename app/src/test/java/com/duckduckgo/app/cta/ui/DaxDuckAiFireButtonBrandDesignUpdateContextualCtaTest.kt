@@ -31,6 +31,7 @@ import com.duckduckgo.app.cta.model.DismissedCta
 import com.duckduckgo.app.global.install.AppInstallStore
 import com.duckduckgo.app.global.model.Site
 import com.duckduckgo.app.onboarding.CustomAiOnboardingStore
+import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo
 import com.duckduckgo.app.onboarding.store.AppStage
 import com.duckduckgo.app.onboarding.store.OnboardingStore
 import com.duckduckgo.app.onboarding.store.UserStageStore
@@ -104,6 +105,7 @@ class DaxDuckAiFireButtonBrandDesignUpdateContextualCtaTest {
     private val mockSettingsDataStore: SettingsDataStore = mock()
     private val mockOnboardingStore: OnboardingStore = mock()
     private val mockCustomAiOnboarding: CustomAiOnboardingStore = mock()
+    private val duckAiOnboardingDemo: DuckAiOnboardingDemo = mock()
     private val mockUserAllowListRepository: UserAllowListRepository = mock()
     private val mockUserStageStore: UserStageStore = mock()
     private val mockAggregateTabProvider: AggregateTabProvider = mock()
@@ -145,7 +147,7 @@ class DaxDuckAiFireButtonBrandDesignUpdateContextualCtaTest {
         whenever(mockOnboardingBrandDesignUpdateToggles.self()).thenReturn(disabledToggle)
         whenever(mockOnboardingBrandDesignUpdateToggles.brandDesignUpdate()).thenReturn(disabledToggle)
         whenever(mockUserStageStore.getUserAppStage()).thenReturn(AppStage.DAX_ONBOARDING)
-        whenever(mockOnboardingStore.isDuckAiOnboardingFlow()).thenReturn(true)
+        whenever(duckAiOnboardingDemo.isActive()).thenReturn(true)
         whenever(mockDuckChat.isDuckChatUrl(any())).thenReturn(true)
         whenever(mockDismissedCtaDao.exists(CtaId.DAX_DUCK_AI_FIRE_BUTTON)).thenReturn(false)
 
@@ -165,6 +167,7 @@ class DaxDuckAiFireButtonBrandDesignUpdateContextualCtaTest {
             settingsDataStore = mockSettingsDataStore,
             onboardingStore = mockOnboardingStore,
             customAiOnboarding = mockCustomAiOnboarding,
+            duckAiOnboardingDemo = duckAiOnboardingDemo,
             userStageStore = mockUserStageStore,
             aggregateTabProvider = mockAggregateTabProvider,
             dispatchers = coroutineRule.testDispatcherProvider,

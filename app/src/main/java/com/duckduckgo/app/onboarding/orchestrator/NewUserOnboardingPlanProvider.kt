@@ -28,6 +28,7 @@ import com.duckduckgo.app.onboarding.CustomAiOnboardingResolver
 import com.duckduckgo.app.onboarding.CustomAiOnboardingStore
 import com.duckduckgo.app.onboarding.DuckAiOnboardingAvailability
 import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo
+import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo.Driver
 import com.duckduckgo.app.onboarding.OnboardingInputScreenLaunchTarget
 import com.duckduckgo.app.onboarding.OnboardingPreference
 import com.duckduckgo.app.onboarding.OnboardingPreferenceApplier
@@ -123,7 +124,7 @@ class NewUserOnboardingPlanProvider @Inject constructor(
             onboardingStore.storeInputScreenSelection(selected = true)
 
             // prepare in-context CTAs
-            duckAiOnboardingDemo.arm()
+            duckAiOnboardingDemo.arm(Driver.LinearPlan)
 
             pixel.fire(CustomAiOnboardingPixelName.PLAN_STARTED, type = Unique())
 
@@ -562,7 +563,7 @@ class NewUserOnboardingPlanProvider @Inject constructor(
         onboardingStore.storeInputScreenSelection(selected = true)
 
         // prepare in-context CTAs
-        duckAiOnboardingDemo.arm()
+        duckAiOnboardingDemo.arm(Driver.LinearPlan)
         return sidePlan(
             id = SEGMENTED_AI_PLAN_ID,
             steps = listOf(

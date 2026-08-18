@@ -22,6 +22,7 @@ import com.duckduckgo.app.cta.db.DismissedCtaDao
 import com.duckduckgo.app.cta.model.CtaId
 import com.duckduckgo.app.cta.model.DismissedCta
 import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo
+import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo.Driver
 import com.duckduckgo.app.onboarding.orchestrator.NewUserOnboardingEvent
 import com.duckduckgo.app.onboarding.store.AppStage
 import com.duckduckgo.app.onboarding.store.UserStageStore
@@ -121,14 +122,14 @@ class OnboardingViewModelTest {
         testee.onOnboardingDone()
 
         verifyNoInteractions(dismissedCtaDao)
-        verify(duckAiOnboardingDemo, never()).arm()
+        verify(duckAiOnboardingDemo, never()).arm(any())
     }
 
     @Test
     fun whenOnboardingDoneWithDuckAiFocusedFlowThenDemoIsArmed() = runTest {
         testee.onOnboardingDone(extendedOnboardingFlow = DUCK_AI_FOCUSED)
 
-        verify(duckAiOnboardingDemo).arm()
+        verify(duckAiOnboardingDemo).arm(Driver.Browser)
     }
 
     @Test
@@ -137,7 +138,7 @@ class OnboardingViewModelTest {
 
         verify(dismissedCtaDao).insert(DismissedCta(CtaId.DAX_INTRO))
         verifyNoMoreInteractions(dismissedCtaDao)
-        verify(duckAiOnboardingDemo, never()).arm()
+        verify(duckAiOnboardingDemo, never()).arm(any())
     }
 
     @Test

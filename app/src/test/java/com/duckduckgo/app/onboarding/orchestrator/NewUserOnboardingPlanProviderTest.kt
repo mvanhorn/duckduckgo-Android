@@ -28,6 +28,7 @@ import com.duckduckgo.app.onboarding.CustomAiOnboardingResolver
 import com.duckduckgo.app.onboarding.CustomAiOnboardingStore
 import com.duckduckgo.app.onboarding.DuckAiOnboardingAvailability
 import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo
+import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo.Driver
 import com.duckduckgo.app.onboarding.OnboardingInputScreenLaunchTarget
 import com.duckduckgo.app.onboarding.OnboardingPreference
 import com.duckduckgo.app.onboarding.OnboardingPreferenceApplier
@@ -653,7 +654,7 @@ class NewUserOnboardingPlanProviderTest {
         start()
 
         // Custom-AI plan arms the in-context Duck.ai demo up front (in buildRootPlan).
-        verify(duckAiOnboardingDemo).arm()
+        verify(duckAiOnboardingDemo).arm(Driver.LinearPlan)
         assertStep(NewUserOnboardingStepIds.INTRO_ANIMATION)
         orchestrator.onEvent(NewUserOnboardingEvent.IntroAnimationFinished)
         assertStep(NewUserOnboardingStepIds.NOTIFICATION_PERMISSION)
@@ -761,7 +762,7 @@ class NewUserOnboardingPlanProviderTest {
 
         assertEquals(Completed(rootPlanId = NewUserOnboardingPlanProvider.ROOT_PLAN_ID), orchestrator.state.value)
         verify(onboardingInputScreenLaunchTarget, never()).setOpenOnDuckAi()
-        verify(duckAiOnboardingDemo, never()).arm()
+        verify(duckAiOnboardingDemo, never()).arm(any())
     }
 
     @Test

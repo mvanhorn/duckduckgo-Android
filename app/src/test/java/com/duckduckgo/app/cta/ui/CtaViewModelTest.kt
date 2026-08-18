@@ -38,7 +38,8 @@ import com.duckduckgo.app.global.db.AppDatabase
 import com.duckduckgo.app.global.install.AppInstallStore
 import com.duckduckgo.app.global.model.Site
 import com.duckduckgo.app.onboarding.CustomAiOnboardingStore
-import com.duckduckgo.app.onboarding.RealDuckAiOnboardingDemo
+import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo
+import com.duckduckgo.app.onboarding.DuckAiOnboardingDemoImpl
 import com.duckduckgo.app.onboarding.store.AppStage
 import com.duckduckgo.app.onboarding.store.OnboardingStore
 import com.duckduckgo.app.onboarding.store.UserStageStore
@@ -132,6 +133,8 @@ class CtaViewModelTest {
     private val mockOnboardingStore: OnboardingStore = mock()
 
     private val mockCustomAiOnboarding: CustomAiOnboardingStore = mock()
+
+    private val duckAiOnboardingDemo: DuckAiOnboardingDemo = mock()
 
     private val mockUserAllowListRepository: UserAllowListRepository = mock()
 
@@ -237,6 +240,7 @@ class CtaViewModelTest {
             settingsDataStore = mockSettingsDataStore,
             onboardingStore = mockOnboardingStore,
             customAiOnboarding = mockCustomAiOnboarding,
+            duckAiOnboardingDemo = duckAiOnboardingDemo,
             userStageStore = mockUserStageStore,
             aggregateTabProvider = mockAggregateTabProvider,
             dispatchers = coroutineRule.testDispatcherProvider,
@@ -385,7 +389,7 @@ class CtaViewModelTest {
     @Test
     fun whenDuckAiEndCtaInteractionAndAllDuckAiOnboardingCtasShownThenStageCompleted() = runTest {
         givenDaxOnboardingActive()
-        whenever(mockOnboardingStore.isDuckAiOnboardingFlow()).thenReturn(true)
+        whenever(duckAiOnboardingDemo.isActive()).thenReturn(true)
         whenever(mockDismissedCtaDao.exists(CtaId.DAX_DUCK_AI_FIRE_BUTTON)).thenReturn(true)
         whenever(mockDismissedCtaDao.exists(CtaId.DAX_DUCK_AI_END)).thenReturn(true)
         whenever(mockSubscriptions.isEligible()).thenReturn(false)
@@ -398,7 +402,7 @@ class CtaViewModelTest {
     @Test
     fun whenDuckAiEndCtaInteractionAndPrivacyProStillPendingThenStageNotCompleted() = runTest {
         givenDaxOnboardingActive()
-        whenever(mockOnboardingStore.isDuckAiOnboardingFlow()).thenReturn(true)
+        whenever(duckAiOnboardingDemo.isActive()).thenReturn(true)
         whenever(mockDismissedCtaDao.exists(CtaId.DAX_DUCK_AI_FIRE_BUTTON)).thenReturn(true)
         whenever(mockDismissedCtaDao.exists(CtaId.DAX_DUCK_AI_END)).thenReturn(true)
         whenever(mockSubscriptions.isEligible()).thenReturn(true)
@@ -1015,7 +1019,7 @@ class CtaViewModelTest {
 
     @Test
     fun whenDuckAiOnboardingFlowThenRequiredDaxOnboardingCtasAreDuckAiFireAndEnd() = runTest {
-        whenever(mockOnboardingStore.isDuckAiOnboardingFlow()).thenReturn(true)
+        whenever(duckAiOnboardingDemo.isActive()).thenReturn(true)
         whenever(mockSubscriptions.isEligible()).thenReturn(false)
 
         val result = testee.requiredDaxOnboardingCtas()
@@ -1025,7 +1029,7 @@ class CtaViewModelTest {
 
     @Test
     fun whenDuckAiOnboardingFlowAndSubscriptionAvailableThenRequiredDaxOnboardingCtasIncludePrivacyProLast() = runTest {
-        whenever(mockOnboardingStore.isDuckAiOnboardingFlow()).thenReturn(true)
+        whenever(duckAiOnboardingDemo.isActive()).thenReturn(true)
         whenever(mockSubscriptions.isEligible()).thenReturn(true)
         whenever(mockSubscriptions.getSubscriptionStatus()).thenReturn(SubscriptionStatus.UNKNOWN)
         whenever(mockExtendedOnboardingFeatureToggles.privacyProCta()).thenReturn(mockEnabledToggle)
@@ -1082,7 +1086,7 @@ class CtaViewModelTest {
     @Test
     fun whenDuckAiOnboardingFlowAndPrivacyProAlreadyShownThenRefreshCtaOnHomeDoesNotReturnSubscriptionCta() = runTest {
         givenDaxOnboardingCompleted()
-        whenever(mockOnboardingStore.isDuckAiOnboardingFlow()).thenReturn(true)
+        whenever(duckAiOnboardingDemo.isActive()).thenReturn(true)
         whenever(mockDismissedCtaDao.exists(CtaId.DAX_DUCK_AI_FIRE_BUTTON)).thenReturn(true)
         whenever(mockDismissedCtaDao.exists(CtaId.DAX_DUCK_AI_END)).thenReturn(true)
         whenever(mockDismissedCtaDao.exists(CtaId.DAX_INTRO_PRIVACY_PRO)).thenReturn(true)
@@ -1103,7 +1107,7 @@ class CtaViewModelTest {
     @Test
     fun whenDuckAiOnboardingFlowAndSubscriptionAvailableThenBubbleDaxDialogsCompletedGatedOnPrivacyPro() = runTest {
         givenDaxOnboardingActive()
-        whenever(mockOnboardingStore.isDuckAiOnboardingFlow()).thenReturn(true)
+        whenever(duckAiOnboardingDemo.isActive()).thenReturn(true)
         whenever(mockSubscriptions.isEligible()).thenReturn(true)
         whenever(mockSubscriptions.getSubscriptionStatus()).thenReturn(SubscriptionStatus.UNKNOWN)
         whenever(mockExtendedOnboardingFeatureToggles.privacyProCta()).thenReturn(mockEnabledToggle)
@@ -1722,7 +1726,7 @@ class CtaViewModelTest {
     @Test
     fun whenPrepareDuckAiEndCtaAndNotInDuckAiFlowThenReturnsNoneAndNoSideEffects() = runTest {
         givenCanShowDuckAiEndCta()
-        whenever(mockOnboardingStore.isDuckAiOnboardingFlow()).thenReturn(false)
+        whenever(duckAiOnboardingDemo.isActive()).thenReturn(false)
 
         val result = testee.prepareAndMarkDuckAiEndCtaForInputScreen()
 
@@ -1920,7 +1924,7 @@ class CtaViewModelTest {
     }
 
     private fun givenCanShowDuckAiEndCta() {
-        whenever(mockOnboardingStore.isDuckAiOnboardingFlow()).thenReturn(true)
+        whenever(duckAiOnboardingDemo.isActive()).thenReturn(true)
         whenever(mockDismissedCtaDao.exists(CtaId.DAX_DUCK_AI_FIRE_BUTTON)).thenReturn(true)
         whenever(mockDismissedCtaDao.exists(CtaId.DAX_DUCK_AI_END)).thenReturn(false)
     }
@@ -2372,9 +2376,9 @@ class CtaViewModelTest {
     )
 
     private fun givenDuckAiOnboardingFlowArmed() {
-        // Mirrors RealDuckAiOnboardingDemo.arm()
-        whenever(mockOnboardingStore.isDuckAiOnboardingFlow()).thenReturn(true)
-        RealDuckAiOnboardingDemo.PRE_DISMISSED_CTAS.forEach {
+        // Mirrors DuckAiOnboardingDemoImpl.arm()
+        whenever(duckAiOnboardingDemo.isActive()).thenReturn(true)
+        DuckAiOnboardingDemoImpl.PRE_DISMISSED_CTAS.forEach {
             whenever(mockDismissedCtaDao.exists(it)).thenReturn(true)
         }
     }

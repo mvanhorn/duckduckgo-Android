@@ -19,40 +19,86 @@ package com.duckduckgo.app.onboarding
 import com.duckduckgo.app.cta.db.DismissedCtaDao
 import com.duckduckgo.app.cta.model.CtaId
 import com.duckduckgo.app.cta.model.DismissedCta
-import com.duckduckgo.app.onboarding.store.OnboardingStore
+import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo.Driver
 import com.duckduckgo.common.test.CoroutineTestRule
+import com.duckduckgo.common.test.api.InMemorySharedPreferences
+import com.duckduckgo.data.store.api.SharedPreferencesProvider
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
-import org.mockito.kotlin.whenever
 
 class DuckAiOnboardingDemoTest {
 
     @get:Rule
     val coroutineRule = CoroutineTestRule()
 
-    private val onboardingStore: OnboardingStore = mock()
+    private val preferences = InMemorySharedPreferences()
+    private val sharedPreferencesProvider: SharedPreferencesProvider = mock {
+        on { getSharedPreferences(any(), any(), any()) } doReturn preferences
+    }
     private val dismissedCtaDao: DismissedCtaDao = mock()
 
-    private val testee = RealDuckAiOnboardingDemo(
-        onboardingStore = onboardingStore,
+    private val testee = DuckAiOnboardingDemoImpl(
+        sharedPreferencesProvider = sharedPreferencesProvider,
         dismissedCtaDao = dismissedCtaDao,
         dispatchers = coroutineRule.testDispatcherProvider,
     )
 
     @Test
-    fun `when armed then duck ai onboarding flow is set`() = runTest {
-        testee.arm()
-        verify(onboardingStore).setDuckAiOnboardingFlow()
+    fun `when not armed then the demo is inactive`() {
+        assertFalse(testee.isActive())
+    }
+
+    @Test
+    fun `when armed then the demo is active`() = runTest {
+        testee.arm(Driver.LinearPlan)
+        assertTrue(testee.isActive())
+    }
+
+    @Test
+    fun `when armed by a linear plan then the driver is the linear plan`() = runTest {
+        testee.arm(Driver.LinearPlan)
+        assertEquals(Driver.LinearPlan, testee.driver())
+    }
+
+    @Test
+    fun `when armed by the browser then the driver is the browser`() = runTest {
+        testee.arm(Driver.Browser)
+        assertEquals(Driver.Browser, testee.driver())
+    }
+
+    @Test
+    fun `when an install armed the demo before the driver existed then the driver is the browser`() {
+        preferences.edit().putBoolean("duckAiOnboardingFlow", true).apply()
+
+        assertTrue(testee.isActive())
+        assertEquals(Driver.Browser, testee.driver())
+    }
+
+    @Test
+    fun `when armed by a linear plan then the demo was central to onboarding`() = runTest {
+        testee.arm(Driver.LinearPlan)
+        assertTrue(testee.wasCentralToOnboarding())
+    }
+
+    @Test
+    fun `when armed by the browser then the demo was not central to onboarding`() = runTest {
+        testee.arm(Driver.Browser)
+        assertFalse(testee.wasCentralToOnboarding())
     }
 
     @Test
     fun `when armed then standard dax ctas are dismissed`() = runTest {
-        testee.arm()
+        testee.arm(Driver.LinearPlan)
         verify(dismissedCtaDao).insert(DismissedCta(CtaId.DAX_INTRO))
         verify(dismissedCtaDao).insert(DismissedCta(CtaId.DAX_DIALOG_SERP))
         verify(dismissedCtaDao).insert(DismissedCta(CtaId.DAX_DIALOG_TRACKERS_FOUND))
@@ -62,8 +108,15 @@ class DuckAiOnboardingDemoTest {
     }
 
     @Test
-    fun `when is active then reads duck ai onboarding flow`() {
-        whenever(onboardingStore.isDuckAiOnboardingFlow()).thenReturn(true)
-        assertTrue(testee.isActive())
+    fun `when finished then the duck ai fire button cta is dismissed`() = runTest {
+        testee.finish()
+        verify(dismissedCtaDao).insert(DismissedCta(CtaId.DAX_DUCK_AI_FIRE_BUTTON))
+    }
+
+    @Test
+    fun `when finished twice then the dismissal is idempotent`() = runTest {
+        testee.finish()
+        testee.finish()
+        verify(dismissedCtaDao, times(2)).insert(DismissedCta(CtaId.DAX_DUCK_AI_FIRE_BUTTON))
     }
 }

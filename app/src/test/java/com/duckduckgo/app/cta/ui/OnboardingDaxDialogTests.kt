@@ -142,6 +142,7 @@ class OnboardingDaxDialogTests {
             settingsDataStore,
             onboardingStore,
             mock(),
+            mock(),
             userStageStore,
             aggregateTabProvider,
             coroutineRule.testDispatcherProvider,
