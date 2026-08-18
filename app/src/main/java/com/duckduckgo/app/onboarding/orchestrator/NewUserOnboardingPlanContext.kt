@@ -16,6 +16,7 @@
 
 package com.duckduckgo.app.onboarding.orchestrator
 
+import com.duckduckgo.app.onboarding.ui.page.configdriven.DownloadReasonSelection
 import com.duckduckgo.onboarding.api.LinearOnboardingResult
 
 /**
@@ -54,4 +55,7 @@ class NewUserOnboardingPlanContext {
      */
     @Volatile
     var skipAddWidget: Boolean = false
+
+    @Volatile
+    var downloadReasonSelection: DownloadReasonSelection? = null
 }

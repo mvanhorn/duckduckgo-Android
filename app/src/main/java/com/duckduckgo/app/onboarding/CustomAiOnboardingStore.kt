@@ -17,6 +17,7 @@
 package com.duckduckgo.app.onboarding
 
 import androidx.core.content.edit
+import com.duckduckgo.app.onboarding.store.OnboardingStore
 import com.duckduckgo.app.onboardingbranddesignupdate.OnboardingBrandDesignUpdateToggles
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.data.store.api.SharedPreferencesProvider
@@ -84,6 +85,7 @@ class CustomAiOnboardingStoreImpl @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val customAiOnboardingFeature: CustomAiOnboardingFeature,
     private val brandDesignUpdateToggles: OnboardingBrandDesignUpdateToggles,
+    private val onboardingStore: OnboardingStore,
 ) : CustomAiOnboardingStore, CustomAiOnboardingResolver, ReferrerParserPlugin {
 
     private val preferences by lazy { sharedPreferencesProvider.getSharedPreferences(PREFS_FILENAME) }
@@ -117,7 +119,7 @@ class CustomAiOnboardingStoreImpl @Inject constructor(
 
     override suspend fun isEnabled(): Boolean = resolveMutex.withLock {
         withContext(dispatcherProvider.io()) {
-            preferences.getBoolean(PREFS_KEY_ENABLED, false)
+            onboardingStore.isSegmentedAiPathEnabled() || preferences.getBoolean(PREFS_KEY_ENABLED, false)
         }
     }
 

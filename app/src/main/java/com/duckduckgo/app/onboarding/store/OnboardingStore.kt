@@ -33,4 +33,6 @@ interface OnboardingStore {
     fun isDuckAiOnboardingFlow(): Boolean
     fun setSegmentedSearchPathWithToggleEnabled(enabled: Boolean)
     fun isSegmentedSearchPathWithToggleEnabled(): Boolean
+    fun setSegmentedAiPathEnabled(enabled: Boolean)
+    fun isSegmentedAiPathEnabled(): Boolean
 }
