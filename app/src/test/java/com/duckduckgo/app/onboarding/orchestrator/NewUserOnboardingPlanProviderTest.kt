@@ -237,12 +237,12 @@ class NewUserOnboardingPlanProviderTest {
     }
 
     @Test
-    fun `when a not yet implemented download reason is confirmed then stays`() = runTest {
+    fun `when the ai download reason is confirmed then switches to the segmented ai plan`() = runTest {
         startSegmentedAtDownloadReason()
 
         orchestrator.onEvent(NewUserOnboardingEvent.DownloadReasonConfirmed(DownloadReasonSelection.AI_CHAT))
 
-        assertStep(NewUserOnboardingStepIds.DOWNLOAD_REASON)
+        assertStep(NewUserOnboardingStepIds.COMPARISON_CHART)
     }
 
     @Test
@@ -648,6 +648,7 @@ class NewUserOnboardingPlanProviderTest {
 
     @Test
     fun `when onboarding path then custom ai plan walks to completed`() = runTest {
+        whenever(duckAiAvailability.isDuckAiOnboardingEnabled()).thenReturn(true)
         whenever(customAiOnboardingResolver.resolve()).thenReturn(true)
         start()
 
@@ -697,6 +698,7 @@ class NewUserOnboardingPlanProviderTest {
 
     @Test
     fun `when onboarding path then input screen preview is chat only`() = runTest {
+        whenever(duckAiAvailability.isDuckAiOnboardingEnabled()).thenReturn(true)
         whenever(customAiOnboardingResolver.resolve()).thenReturn(true)
         start()
         orchestrator.onEvent(NewUserOnboardingEvent.IntroAnimationFinished)
@@ -919,6 +921,7 @@ class NewUserOnboardingPlanProviderTest {
 
     @Test
     fun `when custom ai input screen preview step presented then fires SearchChatToggleShown pixel`() = runTest {
+        whenever(duckAiAvailability.isDuckAiOnboardingEnabled()).thenReturn(true)
         whenever(customAiOnboardingResolver.resolve()).thenReturn(true)
         start()
         orchestrator.onEvent(NewUserOnboardingEvent.IntroAnimationFinished)
@@ -932,6 +935,7 @@ class NewUserOnboardingPlanProviderTest {
 
     @Test
     fun `when duck ai demo step presented then fires AiChatShown pixel`() = runTest {
+        whenever(duckAiAvailability.isDuckAiOnboardingEnabled()).thenReturn(true)
         whenever(customAiOnboardingResolver.resolve()).thenReturn(true)
         start()
         orchestrator.onEvent(NewUserOnboardingEvent.IntroAnimationFinished)
@@ -1124,6 +1128,7 @@ class NewUserOnboardingPlanProviderTest {
 
     @Test
     fun `when custom ai input screen preview demo submitted then sets chat variant and fires TryInputClicked`() = runTest {
+        whenever(duckAiAvailability.isDuckAiOnboardingEnabled()).thenReturn(true)
         whenever(customAiOnboardingResolver.resolve()).thenReturn(true)
         start()
         orchestrator.onEvent(NewUserOnboardingEvent.IntroAnimationFinished)
@@ -1142,6 +1147,7 @@ class NewUserOnboardingPlanProviderTest {
 
     @Test
     fun `when duck ai demo fire completed then fires AiChatClicked`() = runTest {
+        whenever(duckAiAvailability.isDuckAiOnboardingEnabled()).thenReturn(true)
         whenever(customAiOnboardingResolver.resolve()).thenReturn(true)
         start()
         orchestrator.onEvent(NewUserOnboardingEvent.IntroAnimationFinished)
