@@ -37,7 +37,6 @@ import com.duckduckgo.app.cta.model.DismissedCta
 import com.duckduckgo.app.global.db.AppDatabase
 import com.duckduckgo.app.global.install.AppInstallStore
 import com.duckduckgo.app.global.model.Site
-import com.duckduckgo.app.onboarding.CustomAiOnboardingStore
 import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo
 import com.duckduckgo.app.onboarding.DuckAiOnboardingDemoImpl
 import com.duckduckgo.app.onboarding.store.AppStage
@@ -132,8 +131,6 @@ class CtaViewModelTest {
 
     private val mockOnboardingStore: OnboardingStore = mock()
 
-    private val mockCustomAiOnboarding: CustomAiOnboardingStore = mock()
-
     private val duckAiOnboardingDemo: DuckAiOnboardingDemo = mock()
 
     private val mockUserAllowListRepository: UserAllowListRepository = mock()
@@ -217,7 +214,7 @@ class CtaViewModelTest {
         whenever(mockBrokenSitePrompt.isFeatureEnabled()).thenReturn(false)
         whenever(mockBrokenSitePrompt.getUserRefreshPatterns()).thenReturn(emptySet())
         whenever(mockSubscriptions.isEligible()).thenReturn(false)
-        whenever(mockCustomAiOnboarding.isEnabled()).thenReturn(false)
+        whenever(duckAiOnboardingDemo.wasCentralToOnboarding()).thenReturn(false)
         whenever(mockOnboardingBrandDesignUpdateToggles.brandDesignUpdate()).thenReturn(mockDisabledToggle)
         whenever(mockOnboardingBrandDesignUpdateToggles.onboardingImprovements()).thenReturn(mockEnabledToggle)
         whenever(mockOnboardingBrandDesignUpdateToggles.onboardingImprovementsV2()).thenReturn(mockEnabledToggle)
@@ -239,7 +236,6 @@ class CtaViewModelTest {
             userAllowListRepository = mockUserAllowListRepository,
             settingsDataStore = mockSettingsDataStore,
             onboardingStore = mockOnboardingStore,
-            customAiOnboarding = mockCustomAiOnboarding,
             duckAiOnboardingDemo = duckAiOnboardingDemo,
             userStageStore = mockUserStageStore,
             aggregateTabProvider = mockAggregateTabProvider,
@@ -1787,6 +1783,24 @@ class CtaViewModelTest {
         )
 
         assertTrue(cta is DaxDuckAiEndBrandDesignUpdateBubbleCta)
+    }
+
+    @Test
+    fun whenDemoWasCentralToOnboardingThenDuckAiEndBubbleCarriesTheCustomAiFlag() = runTest {
+        givenDaxOnboardingActive()
+        givenCanShowDuckAiEndCta()
+        showInputScreenFlow.value = false
+        whenever(mockOnboardingBrandDesignUpdateToggles.brandDesignUpdate()).thenReturn(mockEnabledToggle)
+        whenever(duckAiOnboardingDemo.wasCentralToOnboarding()).thenReturn(true)
+
+        val cta = testee.refreshCta(
+            coroutineRule.testDispatcher,
+            isBrowserShowing = false,
+            detectedRefreshPatterns = detectedRefreshPatterns,
+            brokenSitePromptUrl = null,
+        )
+
+        assertTrue((cta as DaxDuckAiEndBrandDesignUpdateBubbleCta).isCustomAiOnboardingFlow)
     }
 
     @Test

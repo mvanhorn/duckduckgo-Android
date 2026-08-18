@@ -32,7 +32,6 @@ import com.duckduckgo.app.global.install.AppInstallStore
 import com.duckduckgo.app.global.model.Site
 import com.duckduckgo.app.global.model.domain
 import com.duckduckgo.app.global.model.orderedTrackerBlockedEntities
-import com.duckduckgo.app.onboarding.CustomAiOnboardingStore
 import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo
 import com.duckduckgo.app.onboarding.orchestrator.NewUserOnboardingPlanProvider
 import com.duckduckgo.app.onboarding.store.AppStage
@@ -93,7 +92,6 @@ class CtaViewModel @Inject constructor(
     private val userAllowListRepository: UserAllowListRepository,
     private val settingsDataStore: SettingsDataStore,
     private val onboardingStore: OnboardingStore,
-    private val customAiOnboarding: CustomAiOnboardingStore,
     private val duckAiOnboardingDemo: DuckAiOnboardingDemo,
     private val userStageStore: UserStageStore,
     private val aggregateTabProvider: AggregateTabProvider,
@@ -421,7 +419,7 @@ class CtaViewModel @Inject constructor(
                             appInstallStore = appInstallStore,
                             isLightTheme = appTheme.isLightModeEnabled(),
                             deviceInfo = deviceInfo,
-                            isCustomAiOnboardingFlow = customAiOnboarding.isEnabled(),
+                            isCustomAiOnboardingFlow = usesDuckAiOnboardingCopy(),
                             onboardingImprovementsV2Enabled = isOnboardingImprovementsV2Enabled(),
                         )
                     } else {
@@ -485,7 +483,7 @@ class CtaViewModel @Inject constructor(
                         appInstallStore,
                         appTheme.isLightModeEnabled(),
                         deviceInfo,
-                        isCustomAiOnboardingFlow = customAiOnboarding.isEnabled(),
+                        isCustomAiOnboardingFlow = usesDuckAiOnboardingCopy(),
                         isFreeTrialCopy = freeTrialCopyAvailable(),
                         onboardingImprovementsEnabled = isOnboardingImprovementsEnabled(),
                         onboardingImprovementsV2Enabled = isOnboardingImprovementsV2Enabled(),
@@ -734,6 +732,12 @@ class CtaViewModel @Inject constructor(
     private fun duckAiFireButtonShown(): Boolean = dismissedCtaDao.exists(CtaId.DAX_DUCK_AI_FIRE_BUTTON)
 
     private fun duckAiEndShown(): Boolean = dismissedCtaDao.exists(CtaId.DAX_DUCK_AI_END)
+
+    /**
+     * Whether the trailing onboarding bubbles use the Duck.ai wording. Tracks the kind of onboarding the user
+     * went through, not whether the demo episode is still armed.
+     */
+    private fun usesDuckAiOnboardingCopy(): Boolean = duckAiOnboardingDemo.wasCentralToOnboarding()
 
     private fun isSerpUrl(url: String): Boolean = url.contains(OnboardingDaxDialogCta.SERP)
 

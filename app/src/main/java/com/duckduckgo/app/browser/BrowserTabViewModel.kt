@@ -285,7 +285,6 @@ import com.duckduckgo.app.global.model.domain
 import com.duckduckgo.app.global.model.domainMatchesUrl
 import com.duckduckgo.app.global.model.orderedTrackerBlockedEntities
 import com.duckduckgo.app.location.data.LocationPermissionType
-import com.duckduckgo.app.onboarding.CustomAiOnboardingStore
 import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo
 import com.duckduckgo.app.onboarding.OnboardingInputScreenLaunchTarget
 import com.duckduckgo.app.onboarding.store.OnboardingStore
@@ -586,7 +585,6 @@ class BrowserTabViewModel @Inject constructor(
     private val onboardingBrandDesignUpdateToggles: OnboardingBrandDesignUpdateToggles,
     private val onboardingStore: OnboardingStore,
     private val autocompleteHistoryDeleteFeature: AutocompleteHistoryDeleteFeature,
-    private val customAiOnboardingStore: CustomAiOnboardingStore,
     private val duckAiOnboardingDemo: DuckAiOnboardingDemo,
     private val onboardingInputScreenLaunchTarget: OnboardingInputScreenLaunchTarget,
     private val browserMode: BrowserMode,
@@ -5364,7 +5362,7 @@ class BrowserTabViewModel @Inject constructor(
                     val uri = "https://duckduckgo.com/pro".toUri().buildUpon()
                         .appendQueryParameter("origin", "funnel_onboarding_android")
                         .apply {
-                            if (customAiOnboardingStore.isEnabled()) {
+                            if (subscriptionUpsellTargetsDuckAi()) {
                                 appendQueryParameter("featurePage", "duckai")
                             }
                         }
@@ -5805,6 +5803,12 @@ class BrowserTabViewModel @Inject constructor(
         val trackerEvents = site?.orderedTrackerBlockedEntities()
         command.value = Command.StartAddressBarTrackersAnimation(trackerEvents)
     }
+
+    /**
+     * Whether the onboarding upsell should land on the Duck.ai feature page rather than the Privacy Pro
+     * overview. Tracks the kind of onboarding the user went through, not the demo's lifecycle.
+     */
+    private fun subscriptionUpsellTargetsDuckAi(): Boolean = duckAiOnboardingDemo.wasCentralToOnboarding()
 
     fun dismissDuckAiFireOnboardingCta() {
         viewModelScope.launch {

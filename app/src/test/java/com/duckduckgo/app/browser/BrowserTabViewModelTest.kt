@@ -208,7 +208,6 @@ import com.duckduckgo.app.global.model.PrivacyShield.UNPROTECTED
 import com.duckduckgo.app.global.model.Site
 import com.duckduckgo.app.global.model.SiteFactoryImpl
 import com.duckduckgo.app.location.data.LocationPermissionsDao
-import com.duckduckgo.app.onboarding.CustomAiOnboardingStore
 import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo
 import com.duckduckgo.app.onboarding.OnboardingInputScreenLaunchTarget
 import com.duckduckgo.app.onboarding.store.AppStage
@@ -480,7 +479,6 @@ class BrowserTabViewModelTest {
     private val mockAutoconsentPixelManager: AutoconsentPixelManager = mock()
 
     private val mockOnboardingStore: OnboardingStore = mock()
-    private val mockCustomAiOnboardingStore: CustomAiOnboardingStore = mock()
     private val mockDuckAiOnboardingDemo: DuckAiOnboardingDemo = mock()
     private val mockOnboardingInputScreenLaunchTarget: OnboardingInputScreenLaunchTarget = mock()
 
@@ -814,8 +812,8 @@ class BrowserTabViewModelTest {
             whenever(mockUrlDisplayRepository.isFullUrlEnabled).then { isFullSiteAddressEnabledFlow }
             whenever(mockSSLCertificatesFeature.allowBypass()).thenReturn(mockEnabledToggle)
             whenever(subscriptions.shouldLaunchSubscriptionForUrl(any())).thenReturn(false)
-            whenever(mockCustomAiOnboardingStore.isEnabled()).thenReturn(false)
             whenever(mockDuckAiOnboardingDemo.driver()).thenReturn(DuckAiOnboardingDemo.Driver.Browser)
+            whenever(mockDuckAiOnboardingDemo.wasCentralToOnboarding()).thenReturn(false)
             whenever(mockDuckDuckGoUrlDetector.isDuckDuckGoUrl(any())).thenReturn(false)
             whenever(mockDuckPlayer.isSimulatedYoutubeNoCookie(any())).thenReturn(false)
             whenever(mockDuckPlayer.isDuckPlayerUri(anyString())).thenReturn(false)
@@ -851,7 +849,6 @@ class BrowserTabViewModelTest {
                     userAllowListRepository = mockUserAllowListRepository,
                     settingsDataStore = ctaViewModelMockSettingsStore,
                     onboardingStore = mockOnboardingStore,
-                    customAiOnboarding = mockCustomAiOnboardingStore,
                     duckAiOnboardingDemo = mockDuckAiOnboardingDemo,
                     userStageStore = mockUserStageStore,
                     aggregateTabProvider = mockAggregateTabProvider,
@@ -1058,7 +1055,6 @@ class BrowserTabViewModelTest {
                 onboardingBrandDesignUpdateToggles = mockOnboardingBrandDesignUpdateToggles,
                 onboardingStore = mockOnboardingStore,
                 autocompleteHistoryDeleteFeature = fakeAutocompleteHistoryDeleteFeature,
-                customAiOnboardingStore = mockCustomAiOnboardingStore,
                 duckAiOnboardingDemo = mockDuckAiOnboardingDemo,
                 onboardingInputScreenLaunchTarget = mockOnboardingInputScreenLaunchTarget,
                 browserMode = browserMode,
@@ -4070,8 +4066,8 @@ class BrowserTabViewModelTest {
     }
 
     @Test
-    fun whenUserClickedDaxSubscriptionCtaInCustomAiOnboardingFlowThenLaunchSubscriptionWithFeaturePageDuckAi() = runTest {
-        whenever(mockCustomAiOnboardingStore.isEnabled()).thenReturn(true)
+    fun whenUserClickedDaxSubscriptionCtaAndDemoWasCentralToOnboardingThenLaunchSubscriptionWithFeaturePageDuckAi() = runTest {
+        whenever(mockDuckAiOnboardingDemo.wasCentralToOnboarding()).thenReturn(true)
         val cta = DaxBubbleCta.DaxSubscriptionCta(
             mockOnboardingStore,
             mockAppInstallStore,

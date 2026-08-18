@@ -176,7 +176,6 @@ class DaxSiteSuggestionsBrandDesignUpdateContextualCtaTest {
             userAllowListRepository = mockUserAllowListRepository,
             settingsDataStore = mockSettingsDataStore,
             onboardingStore = mockOnboardingStore,
-            customAiOnboarding = mock(),
             duckAiOnboardingDemo = mock(),
             userStageStore = mockUserStageStore,
             aggregateTabProvider = mockAggregateTabProvider,
