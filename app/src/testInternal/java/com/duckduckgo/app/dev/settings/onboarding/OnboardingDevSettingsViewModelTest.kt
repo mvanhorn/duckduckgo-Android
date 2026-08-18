@@ -142,6 +142,7 @@ class OnboardingDevSettingsViewModelTest {
         whenever(settingsDataStore.hideTips).thenReturn(false)
         whenever(ctaViewModel.requiredDaxOnboardingCtas()).thenReturn(requiredCtas)
         allCtaIds.forEach { ctaId -> whenever(dismissedCtaDao.exists(ctaId)).thenReturn(false) }
+        testee.start()
 
         testee.onOnboardingCompletedToggled(true)
 
@@ -155,6 +156,7 @@ class OnboardingDevSettingsViewModelTest {
         whenever(settingsDataStore.hideTips).thenReturn(false)
         whenever(ctaViewModel.requiredDaxOnboardingCtas()).thenReturn(requiredCtas)
         allCtaIds.forEach { ctaId -> whenever(dismissedCtaDao.exists(ctaId)).thenReturn(true) }
+        testee.start()
 
         testee.onOnboardingCompletedToggled(false)
 
