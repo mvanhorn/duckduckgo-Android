@@ -66,8 +66,9 @@ import com.google.android.material.R as MaterialR
  *
  * Presented as a scrimmed dialog (same scrim as the fire dialog) with a transparent background so
  * only the suggested prompts and the native input float over the page. It owns the INPUT stage: when
- * the user submits a prompt or picks a suggestion, it hands control back to the host via
- * [onAskAboutPage], which embeds and shows the contextual sheet.
+ * the user submits a prompt or picks a suggestion, it parks the prompt and asks the host to show the
+ * contextual sheet (via the shared view model), which consumes the prompt. The hand-off is derived
+ * from the retained tab id, so it survives configuration changes.
  */
 @InjectWith(FragmentScope::class)
 class DuckChatContextualEntryDialog : DuckDuckGoBottomSheetDialogFragment() {
@@ -97,7 +98,6 @@ class DuckChatContextualEntryDialog : DuckDuckGoBottomSheetDialogFragment() {
 
     private val sharedContextualViewModel: DuckChatContextualSharedViewModel by viewModels({ requireParentFragment() })
     private lateinit var tabId: String
-    private var onAskAboutPage: (() -> Unit)? = null
 
     // No running chat in the entry stage; the widget's chat-id-driven affordances stay collapsed.
     private val chatIdFlow = MutableStateFlow<String?>(null)
@@ -143,10 +143,6 @@ class DuckChatContextualEntryDialog : DuckDuckGoBottomSheetDialogFragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        if (onAskAboutPage == null) {
-            dismiss()
-            return
-        }
         tabId = requireNotNull(requireArguments().getString(ARG_TAB_ID)) {
             "DuckChatContextualEntryDialog requires $ARG_TAB_ID argument"
         }
@@ -184,7 +180,7 @@ class DuckChatContextualEntryDialog : DuckDuckGoBottomSheetDialogFragment() {
     private fun handleCommand(command: DuckChatContextualEntryViewModel.Command) {
         when (command) {
             DuckChatContextualEntryViewModel.Command.HandOffToSheet -> {
-                onAskAboutPage?.invoke()
+                sharedContextualViewModel.requestShowSheet(tabId)
                 dismiss()
             }
         }
@@ -363,13 +359,9 @@ class DuckChatContextualEntryDialog : DuckDuckGoBottomSheetDialogFragment() {
         private const val ARG_TAB_ID = "tabId"
         private const val REQUEST_CODE_CHOOSE_FILE = 100
 
-        fun newInstance(
-            tabId: String,
-            onAskAboutPage: () -> Unit,
-        ): DuckChatContextualEntryDialog =
+        fun newInstance(tabId: String): DuckChatContextualEntryDialog =
             DuckChatContextualEntryDialog().apply {
                 arguments = bundleOf(ARG_TAB_ID to tabId)
-                this.onAskAboutPage = onAskAboutPage
             }
     }
 }
