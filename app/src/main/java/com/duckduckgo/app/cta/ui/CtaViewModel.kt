@@ -733,10 +733,6 @@ class CtaViewModel @Inject constructor(
 
     private fun duckAiEndShown(): Boolean = dismissedCtaDao.exists(CtaId.DAX_DUCK_AI_END)
 
-    /**
-     * Whether the trailing onboarding bubbles use the Duck.ai wording. Tracks the kind of onboarding the user
-     * went through, not whether the demo episode is still armed.
-     */
     private fun usesDuckAiOnboardingCopy(): Boolean = duckAiOnboardingDemo.wasCentralToOnboarding()
 
     private fun isSerpUrl(url: String): Boolean = url.contains(OnboardingDaxDialogCta.SERP)

@@ -31,14 +31,13 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * The in-browser Duck.ai onboarding demo (the fire-button CTA sequence). Owns the whole episode — its state
- * included — so every entry point (the legacy onboarding-done handoff and the linear-onboarding
- * `duck_ai_demo` step) arms and ends it identically.
+ * The in-browser Duck.ai onboarding demo (the fire-button CTA sequence) owner.
+ * Every path that requires the demo routes through this interface.
  */
 interface DuckAiOnboardingDemo {
     /**
-     * Arm the demo: mark the episode active and silence the standard DAX onboarding CTAs so only the
-     * Duck.ai demo CTAs show. [driver] records who ends the episode.
+     * Arm the demo: mark the flow active and silence the standard DAX onboarding CTAs so only the
+     * Duck.ai demo CTAs show. [driver] represents who ends the flow.
      */
     suspend fun arm(driver: Driver)
 
@@ -46,20 +45,19 @@ interface DuckAiOnboardingDemo {
     fun isActive(): Boolean
 
     /**
-     * Who ends the episode. [Driver.LinearPlan] defers dismissal of the Duck.ai fire-button CTA to
+     * Who ends the flow. [Driver.LinearPlan] defers dismissal of the Duck.ai fire-button CTA to
      * [finish], so the CTA survives an app kill and the plan can re-run; [Driver.Browser] lets the CTA
      * dismiss itself on user interaction, because no plan will ever call [finish] for it.
      */
     fun driver(): Driver
 
     /**
-     * Whether this install's onboarding led with Duck.ai — the AI comparison chart, the chat-only input
-     * preview, then the demo. Picks Duck.ai copy and post-onboarding destinations long after the episode is
-     * over. False for the legacy chat handoff, where a search-shaped plan merely ended on a chat query.
+     * Whether the current onboarding flow is focused on Duck.ai.
+     * If true, picks Duck.ai-specific copies for CTA, route to specific subscription upsells, and potentially more.
      */
     fun wasCentralToOnboarding(): Boolean
 
-    /** End the episode by dismissing the Duck.ai fire-button CTA. Safe to call more than once. */
+    /** End the flow by dismissing the Duck.ai fire-button CTA. Safe to call more than once. */
     suspend fun finish()
 
     enum class Driver { LinearPlan, Browser }

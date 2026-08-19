@@ -5804,10 +5804,6 @@ class BrowserTabViewModel @Inject constructor(
         command.value = Command.StartAddressBarTrackersAnimation(trackerEvents)
     }
 
-    /**
-     * Whether the onboarding upsell should land on the Duck.ai feature page rather than the Privacy Pro
-     * overview. Tracks the kind of onboarding the user went through, not the demo's lifecycle.
-     */
     private fun subscriptionUpsellTargetsDuckAi(): Boolean = duckAiOnboardingDemo.wasCentralToOnboarding()
 
     fun dismissDuckAiFireOnboardingCta() {

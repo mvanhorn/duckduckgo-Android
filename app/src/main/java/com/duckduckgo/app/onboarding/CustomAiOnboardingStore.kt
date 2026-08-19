@@ -39,11 +39,10 @@ import javax.inject.Inject
 
 interface CustomAiOnboardingStore {
     /**
-     * Returns whether this install came from the `onboarding=ai` campaign referral.
+     * Returns whether this app install came from the `onboarding=ai` campaign referral.
      *
      * The decision is persisted by [CustomAiOnboardingResolver.resolve] at onboarding plan build time.
-     * Calling this does not re-evaluate. It says nothing about whether a Duck.ai demo ran — ask
-     * [com.duckduckgo.app.onboarding.DuckAiOnboardingDemo] for that.
+     * Calling this does not re-evaluate.
      */
     suspend fun isAiReferralOnboarding(): Boolean
 }
