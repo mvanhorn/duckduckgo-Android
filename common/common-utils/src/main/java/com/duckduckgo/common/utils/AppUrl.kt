@@ -48,6 +48,8 @@ class AppUrl {
     object ParamValue {
         const val SOURCE = "ddg_android"
         const val SOURCE_EU_AUCTION = "ddg_androideu"
+        const val SOURCE_TABLET = "ddg_android_tablet"
+        const val SOURCE_EU_AUCTION_TABLET = "ddg_androideu_tablet"
         const val HIDE_SERP = "-1"
         const val HIDE_DUCK_AI = "-1"
         const val CHAT_VERTICAL = "chat"
