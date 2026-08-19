@@ -28,6 +28,7 @@ import com.duckduckgo.app.statistics.store.StatisticsSharedPreferences
 import com.duckduckgo.autofill.api.email.EmailManager
 import com.duckduckgo.common.test.CoroutineTestRule
 import com.duckduckgo.common.test.InstantSchedulersRule
+import com.duckduckgo.common.utils.device.DeviceInfo
 import com.duckduckgo.common.utils.plugins.PluginPoint
 import com.duckduckgo.experiments.api.VariantManager
 import kotlinx.coroutines.test.TestScope
@@ -52,6 +53,7 @@ class AtbIntegrationTest {
     private lateinit var testee: StatisticsRequester
     private lateinit var statisticsStore: StatisticsDataStore
     private var emailManager: EmailManager = mock()
+    private var deviceInfo: DeviceInfo = mock()
 
     @get:Rule
     val schedulers = InstantSchedulersRule()
@@ -66,6 +68,7 @@ class AtbIntegrationTest {
         statisticsStore.clearAtb()
 
         whenever(mockVariantManager.getVariantKey()).thenReturn("ma")
+        whenever(deviceInfo.formFactor()).thenReturn(DeviceInfo.FormFactor.PHONE)
         service = getDaggerComponent().retrofit().create(StatisticsService::class.java)
 
         val plugins = object : PluginPoint<AtbLifecyclePlugin> {
@@ -81,6 +84,7 @@ class AtbIntegrationTest {
             emailManager,
             TestScope(),
             coroutineTestRule.testDispatcherProvider,
+            deviceInfo,
         )
     }
 
