@@ -82,7 +82,6 @@ class DuckChatContextualViewModelTest {
     private val modelManager: com.duckduckgo.duckchat.impl.models.DuckAiModelManager = mock()
     private val contextualNativeInputManager: ContextualNativeInputManager = mock()
     private val chatHistoryRepository: ChatHistoryRepository = mock()
-    private val contextualEntryPromptStore: ContextualEntryPromptStore = mock()
     private val recentChatsFlow = MutableStateFlow<List<ChatHistoryItem>>(emptyList())
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -441,7 +440,6 @@ class DuckChatContextualViewModelTest {
                     modelManager = modelManager,
                     contextualNativeInputManager = contextualNativeInputManager,
                     chatHistoryRepository = chatHistoryRepository,
-                    contextualEntryPromptStore = contextualEntryPromptStore,
                     context = context,
                 )
 
@@ -849,7 +847,6 @@ class DuckChatContextualViewModelTest {
                     modelManager = modelManager,
                     contextualNativeInputManager = contextualNativeInputManager,
                     chatHistoryRepository = chatHistoryRepository,
-                    contextualEntryPromptStore = contextualEntryPromptStore,
                     context = context,
                 )
 
@@ -891,7 +888,6 @@ class DuckChatContextualViewModelTest {
                     modelManager = modelManager,
                     contextualNativeInputManager = contextualNativeInputManager,
                     chatHistoryRepository = chatHistoryRepository,
-                    contextualEntryPromptStore = contextualEntryPromptStore,
                     context = context,
                 )
 
@@ -1343,46 +1339,6 @@ class DuckChatContextualViewModelTest {
 
         verify(duckChatPixels).reportContextualSheetNewChatFromPopup()
         verify(duckChatPixels, never()).reportContextualSheetNewChat()
-    }
-
-    @Test
-    fun `onNewChatRequestedFromPopup with redesign enabled hands off to entry dialog and reports popup pixel`() = runTest {
-        whenever(duckChatInternal.isContextualSheetRedesignEnabled()).thenReturn(true)
-
-        testee.commands.test {
-            testee.onNewChatRequestedFromPopup()
-
-            assertTrue(awaitItem() is DuckChatContextualViewModel.Command.ShowNewChatEntryDialog)
-            cancelAndIgnoreRemainingEvents()
-        }
-
-        verify(duckChatPixels).reportContextualSheetNewChatFromPopup()
-    }
-
-    @Test
-    fun `onNewChatFromEntryDialog consumes parked prompt and starts a new chat`() = runTest {
-        val tabId = "tab-1"
-        testee.onSheetOpened(tabId)
-        coroutineRule.testDispatcher.scheduler.advanceUntilIdle()
-
-        val prompt = NativeInputPrompt("hello", "model-1", "high", null, null, null)
-        whenever(contextualEntryPromptStore.consume(tabId)).thenReturn(ContextualEntryPrompt(tabId, prompt, null))
-
-        testee.onNewChatFromEntryDialog()
-        coroutineRule.testDispatcher.scheduler.advanceUntilIdle()
-
-        assertEquals(DuckChatContextualViewModel.SheetMode.WEBVIEW, testee.viewState.value.sheetMode)
-    }
-
-    @Test
-    fun `onNewChatFromEntryDialog with nothing parked does not start a chat`() = runTest {
-        testee.onSheetOpened("tab-1")
-        coroutineRule.testDispatcher.scheduler.advanceUntilIdle()
-
-        testee.onNewChatFromEntryDialog()
-        coroutineRule.testDispatcher.scheduler.advanceUntilIdle()
-
-        assertEquals(DuckChatContextualViewModel.SheetMode.INPUT, testee.viewState.value.sheetMode)
     }
 
     @Test
@@ -2641,7 +2597,6 @@ class DuckChatContextualViewModelTest {
         modelManager = modelManager,
         contextualNativeInputManager = contextualNativeInputManager,
         chatHistoryRepository = chatHistoryRepository,
-        contextualEntryPromptStore = contextualEntryPromptStore,
         context = context,
     )
 

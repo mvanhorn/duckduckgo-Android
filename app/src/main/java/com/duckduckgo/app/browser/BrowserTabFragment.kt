@@ -2159,6 +2159,10 @@ class BrowserTabFragment :
                         viewModel.collectPageContext()
                     }
 
+                    is DuckChatContextualSharedViewModel.Command.ShowSheet -> {
+                        showDuckChatContextualSheet(command.tabId)
+                    }
+
                     else -> {}
                 }
             }.launchIn(viewLifecycleOwner.lifecycleScope)
@@ -3982,7 +3986,7 @@ class BrowserTabFragment :
         transaction.show(fragment)
         transaction.commit()
 
-        sharedContextualViewModel.onOpenRequested()
+        sharedContextualViewModel.onReloadChatRequested()
     }
 
     private fun reactToDuckChatContextualSheetResult() {

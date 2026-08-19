@@ -440,8 +440,6 @@ class DuckChatContextualFragment :
                                             if (method == RealDuckChatJSHelper.METHOD_GET_AI_CHAT_NATIVE_HANDOFF_DATA) {
                                                 logcat { "Duck.ai: requesting page context after chat fully loaded" }
                                                 sharedContextualViewModel.requestPageContext()
-                                                // Submit any prompt handed over from the entry dialog now that the web app is ready.
-                                                viewModel.onWebAppReady()
                                             }
                                         }
                                     }
@@ -766,12 +764,6 @@ class DuckChatContextualFragment :
                         showChatsPopup(command.showNewChatHeader, command.recentChats)
                     }
 
-                    is DuckChatContextualViewModel.Command.ShowNewChatEntryDialog -> {
-                        // Hide the running chat so it isn't left dimmed behind the transparent entry dialog.
-                        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-                        showContextualEntryDialogForNewChat(command.tabId)
-                    }
-
                     is DuckChatContextualViewModel.Command.OpenChatUrl -> {
                         viewModel.onContextualClose()
                         startActivity(browserNav.openInNewTab(requireContext(), command.url, command.sourceTabId))
@@ -819,8 +811,8 @@ class DuckChatContextualFragment :
                         viewModel.onMainBrowserPageFinished(command.isStorePageContextEnabled)
                     }
 
-                    DuckChatContextualSharedViewModel.Command.OpenSheet -> {
-                        logcat { "Duck.ai Contextual: OpenSheet" }
+                    DuckChatContextualSharedViewModel.Command.ReloadChat -> {
+                        logcat { "Duck.ai Contextual: ReloadChat" }
                         setupKeyboardVisibilityListener()
                         viewModel.onSheetReopened()
                         if (viewModel.viewState.value.sheetMode == DuckChatContextualViewModel.SheetMode.INPUT) {
@@ -960,14 +952,6 @@ class DuckChatContextualFragment :
         binding.contextualSuggestionsView.onContentChanged = {
             applyQuickActionVisibility(viewModel.viewState.value)
         }
-    }
-
-    private fun showContextualEntryDialogForNewChat(tabId: String) {
-        val fragmentManager = parentFragment?.childFragmentManager ?: return
-        if (fragmentManager.isStateSaved) return
-        DuckChatContextualEntryDialog
-            .newInstance(tabId) { viewModel.onNewChatFromEntryDialog() }
-            .show(fragmentManager, DuckChatContextualEntryDialog.TAG)
     }
 
     private fun showChatsPopup(showNewChatHeader: Boolean, recentChats: List<ChatHistoryItem>) {

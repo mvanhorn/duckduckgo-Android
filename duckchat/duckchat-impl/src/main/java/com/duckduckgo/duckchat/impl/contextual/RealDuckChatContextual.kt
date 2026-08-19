@@ -72,9 +72,17 @@ class RealDuckChatContextual @Inject constructor(
     }
 
     override fun createChatSurface(tabId: String): Fragment {
-        return DuckChatContextualFragment().apply {
-            arguments = Bundle().apply {
-                putString(DuckChatContextualFragment.KEY_DUCK_AI_CONTEXTUAL_TAB_ID, tabId)
+        return if (duckChatInternal.isContextualSheetRedesignEnabled()) {
+            DuckChatContextualWebViewFragment().apply {
+                arguments = Bundle().apply {
+                    putString(DuckChatContextualWebViewFragment.KEY_DUCK_AI_CONTEXTUAL_TAB_ID, tabId)
+                }
+            }
+        } else {
+            DuckChatContextualFragment().apply {
+                arguments = Bundle().apply {
+                    putString(DuckChatContextualFragment.KEY_DUCK_AI_CONTEXTUAL_TAB_ID, tabId)
+                }
             }
         }
     }
