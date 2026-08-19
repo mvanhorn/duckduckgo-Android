@@ -21,7 +21,7 @@ import com.duckduckgo.app.cta.db.DismissedCtaDao
 import com.duckduckgo.app.cta.model.CtaId
 import com.duckduckgo.app.cta.model.DismissedCta
 import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo.Driver
-import com.duckduckgo.app.onboarding.store.OnboardingStoreImpl
+import com.duckduckgo.app.onboarding.store.OnboardingStore
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.data.store.api.SharedPreferencesProvider
 import com.duckduckgo.di.scopes.AppScope
@@ -67,15 +67,12 @@ interface DuckAiOnboardingDemo {
 @ContributesBinding(AppScope::class)
 class DuckAiOnboardingDemoImpl @Inject constructor(
     private val sharedPreferencesProvider: SharedPreferencesProvider,
+    private val onboardingStore: OnboardingStore,
     private val dismissedCtaDao: DismissedCtaDao,
     private val dispatchers: DispatcherProvider,
 ) : DuckAiOnboardingDemo {
 
-    // Shares OnboardingStoreImpl's prefs file, and keeps that class's original key verbatim, so an install
-    // that armed the demo before this class owned the state stays armed. Relocating the key would deactivate
-    // a mid-flight demo on upgrade, leaving the user with no CTAs at all — arm() has already pre-dismissed
-    // the standard DAX ones.
-    private val preferences by lazy { sharedPreferencesProvider.getSharedPreferences(OnboardingStoreImpl.FILENAME) }
+    private val preferences by lazy { sharedPreferencesProvider.getSharedPreferences(FILENAME) }
 
     override suspend fun arm(driver: Driver) {
         withContext(dispatchers.io()) {
@@ -87,7 +84,7 @@ class DuckAiOnboardingDemoImpl @Inject constructor(
         }
     }
 
-    override fun isActive(): Boolean = preferences.getBoolean(KEY_ACTIVE, false)
+    override fun isActive(): Boolean = preferences.getBoolean(KEY_ACTIVE, legacyActive())
 
     override fun driver(): Driver =
         if (preferences.getBoolean(KEY_PLAN_DRIVEN, false)) Driver.LinearPlan else Driver.Browser
@@ -96,6 +93,14 @@ class DuckAiOnboardingDemoImpl @Inject constructor(
     // If a search-led plan ever runs a plan-driven demo, this needs its own key defaulted from the driver.
     override fun wasCentralToOnboarding(): Boolean = driver() == Driver.LinearPlan
 
+    /**
+     * The state of the flow before this class owned it, so an instance that armed the demo pre-upgrade
+     * stays armed — deactivating a mid-flight demo would leave the user with no CTAs at all, since [arm]
+     * has already pre-dismissed the standard DAX ones. Only remove the fallback once the update has reached critical adoption.
+     */
+    @Suppress("DEPRECATION")
+    private fun legacyActive(): Boolean = onboardingStore.isDuckAiOnboardingFlow()
+
     override suspend fun finish() {
         withContext(dispatchers.io()) {
             dismissedCtaDao.insert(DismissedCta(CtaId.DAX_DUCK_AI_FIRE_BUTTON))
@@ -103,9 +108,9 @@ class DuckAiOnboardingDemoImpl @Inject constructor(
     }
 
     companion object {
-        // Must stay byte-identical to the key OnboardingStoreImpl used before this class took the state over.
-        private const val KEY_ACTIVE = "duckAiOnboardingFlow"
-        private const val KEY_PLAN_DRIVEN = "duckAiOnboardingPlanDriven"
+        private const val FILENAME = "com.duckduckgo.app.onboarding.duckaidemo"
+        private const val KEY_ACTIVE = "active"
+        private const val KEY_PLAN_DRIVEN = "planDriven"
 
         /**
          * Standard DAX onboarding CTAs the Duck.ai flow pre-dismisses when armed, so only the Duck.ai

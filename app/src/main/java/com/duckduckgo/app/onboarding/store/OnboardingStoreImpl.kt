@@ -222,6 +222,11 @@ class OnboardingStoreImpl @Inject constructor(
         preferences.edit { putBoolean(KEY_INPUT_SCREEN_SELECTION_OVERRIDDEN_BY_USER, true) }
     }
 
+    @Deprecated("Migration only: the Duck.ai demo owns this state now.")
+    override fun isDuckAiOnboardingFlow(): Boolean {
+        return preferences.getBoolean(KEY_DUCK_AI_ONBOARDING_FLOW, false)
+    }
+
     override fun setSegmentedSearchPathWithToggleEnabled(enabled: Boolean) {
         preferences.edit { putBoolean(KEY_SEGMENTED_SEARCH_PATH_WITH_TOGGLE_ENABLED, enabled) }
     }
@@ -231,7 +236,10 @@ class OnboardingStoreImpl @Inject constructor(
     }
 
     companion object {
-        const val FILENAME = "com.duckduckgo.app.onboarding.settings"
+        private const val FILENAME = "com.duckduckgo.app.onboarding.settings"
+
+        // Read only by the deprecated isDuckAiOnboardingFlow migration accessor.
+        private const val KEY_DUCK_AI_ONBOARDING_FLOW = "duckAiOnboardingFlow"
         const val ONBOARDING_JOURNEY = "onboardingJourney"
         private const val KEY_INPUT_SCREEN_SELECTION = "inputScreenSelection"
         private const val KEY_INPUT_SCREEN_SELECTION_OVERRIDDEN_BY_USER = "inputScreenSelectionOverriddenByUser"

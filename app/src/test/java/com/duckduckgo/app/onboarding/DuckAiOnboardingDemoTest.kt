@@ -20,6 +20,7 @@ import com.duckduckgo.app.cta.db.DismissedCtaDao
 import com.duckduckgo.app.cta.model.CtaId
 import com.duckduckgo.app.cta.model.DismissedCta
 import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo.Driver
+import com.duckduckgo.app.onboarding.store.OnboardingStore
 import com.duckduckgo.common.test.CoroutineTestRule
 import com.duckduckgo.common.test.api.InMemorySharedPreferences
 import com.duckduckgo.data.store.api.SharedPreferencesProvider
@@ -35,6 +36,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
+import org.mockito.kotlin.whenever
 
 class DuckAiOnboardingDemoTest {
 
@@ -46,9 +48,11 @@ class DuckAiOnboardingDemoTest {
         on { getSharedPreferences(any(), any(), any()) } doReturn preferences
     }
     private val dismissedCtaDao: DismissedCtaDao = mock()
+    private val onboardingStore: OnboardingStore = mock()
 
     private val testee = DuckAiOnboardingDemoImpl(
         sharedPreferencesProvider = sharedPreferencesProvider,
+        onboardingStore = onboardingStore,
         dismissedCtaDao = dismissedCtaDao,
         dispatchers = coroutineRule.testDispatcherProvider,
     )
@@ -76,12 +80,22 @@ class DuckAiOnboardingDemoTest {
         assertEquals(Driver.Browser, testee.driver())
     }
 
+    @Suppress("DEPRECATION")
     @Test
-    fun `when an install armed the demo before the driver existed then the driver is the browser`() {
-        preferences.edit().putBoolean("duckAiOnboardingFlow", true).apply()
+    fun `when an install armed the demo before this class owned the state then it stays active as browser driven`() {
+        whenever(onboardingStore.isDuckAiOnboardingFlow()).thenReturn(true)
 
         assertTrue(testee.isActive())
         assertEquals(Driver.Browser, testee.driver())
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `when this class has armed the demo then the legacy value is not consulted`() = runTest {
+        whenever(onboardingStore.isDuckAiOnboardingFlow()).thenReturn(false)
+        testee.arm(Driver.LinearPlan)
+
+        assertTrue(testee.isActive())
     }
 
     @Test
